@@ -2,7 +2,8 @@
 {
     public interface ISystem
     {
-        void Init();
-        
+        void InitSystem();
+        void UpdateSystem();
+        void FixedUpdateSystem();
     }
 }
