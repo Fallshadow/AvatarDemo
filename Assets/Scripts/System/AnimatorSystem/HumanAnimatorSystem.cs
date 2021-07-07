@@ -4,13 +4,17 @@ namespace ASeKi.system
 {
     public class HumanAnimatorSystem : AnimatorSystem
     {
+        public const float walkSpeed = 0.5f;
+        public const float runningSpeed = 1f;
+        public const float sprintSpeed = 1.5f;
+        
         private HumanAnimatorParametersStruct animPData;
         private float animationInputPSmooth = 0.2f;
 
         public virtual void SetParam(HumanAnimatorParametersStruct humanAnimatorParametersStructP)
         {
             animPData = humanAnimatorParametersStructP;
-            animPData.InputMagnitude = SetAnimatorMoveSpeed(animPData.MoveDirection, animPData.RunningSpeed, animPData.WalkSpeed);
+            animPData.InputMagnitude = SetAnimatorMoveSpeed(animPData.MoveDirection);
         }
 
         public override void UpdateSystem()
@@ -30,11 +34,13 @@ namespace ASeKi.system
                 animPData.StopMove ? 0 : animPData.InputMagnitude, animationInputPSmooth, Time.deltaTime);
         }
 
-        public float SetAnimatorMoveSpeed(Vector3 moveDirection, float runningSpeed, float walkSpeed)
+        public float SetAnimatorMoveSpeed(Vector3 moveDirection)
         {
             Vector3 relativeInput = transform.InverseTransformDirection(moveDirection);
+            Debug.Log($"{moveDirection}   {relativeInput}");
             var newInput = new Vector2(relativeInput.z, relativeInput.x);
-            return Mathf.Clamp(newInput.magnitude, 0, animPData.IsRunning ? runningSpeed : walkSpeed);
+            float result = Mathf.Clamp(animPData.IsRunning ? newInput.magnitude + 0.5f : newInput.magnitude, 0, animPData.IsRunning ? sprintSpeed : runningSpeed);
+            return result;
         }
     }
 

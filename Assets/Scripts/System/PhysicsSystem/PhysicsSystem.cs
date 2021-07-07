@@ -25,6 +25,11 @@ namespace ASeKi.system
 
         public void UpdateSystem()
         {
+            
+        }
+
+        public void FixedUpdateSystem()
+        {
             ControlGround();
             
             ControlJump();
@@ -32,11 +37,6 @@ namespace ASeKi.system
             ControlAirMove();
             
             ControlMaterialPhysics();
-        }
-
-        public void FixedUpdateSystem()
-        {
-            
         }
 
         // 外界参数传入，管理者最好是先调用设置参数然后再调用此系统的更新循环
@@ -48,6 +48,11 @@ namespace ASeKi.system
             if (isJumping)
             {
                 return;
+            }
+
+            if (isJumpingP)
+            {
+                jumpCounter = jumpCounterDefaut;
             }
             isJumping = isJumpingP;
             
@@ -74,8 +79,8 @@ namespace ASeKi.system
         public bool isGrounded = true;
         private RaycastHit groundHit;                      // 射到地面的射线信息
         private LayerMask groundLayer;
-        private float groundMinDistance = 0.25f;           // 小于这个距离被认为是在地面
-        private float groundMaxDistance = 0.5f;            // 大于这个距离被认为不是在地面
+        private float groundMinDistance = 0.05f;           // 大于这个距离却小于最小距离就要施加额外力
+        private float groundMaxDistance = 0.1f;            // 小于这个距离被认为是在地面
         private float groundDistance;                      // 地面距离
         
         private float extraGravity = -10f;                  // 角色离地面有一定距离，而且并非处于起跳状态时，给予一定向下的力
@@ -85,26 +90,15 @@ namespace ASeKi.system
         {
             checkGroundDistance();
 
-            if (groundDistance <= groundMinDistance)
+            if (groundDistance <= groundMaxDistance)
             {
                 isGrounded = true;
-                if (!isJumping && groundDistance > 0.05f)
+                if (!isJumping && groundDistance > groundMinDistance)
                     _rigidbody.AddForce(transform.up * (extraGravity * 2 * Time.deltaTime), ForceMode.VelocityChange);
             }
             else
             {
-                if (groundDistance >= groundMaxDistance)
-                {
-                    isGrounded = false;
-                    if (!isJumping)
-                    {
-                        _rigidbody.AddForce(Time.deltaTime * extraGravity * transform.up, ForceMode.VelocityChange);
-                    }
-                }
-                else if (!isJumping)
-                {
-                    _rigidbody.AddForce(transform.up * (extraGravity * 2 * Time.deltaTime), ForceMode.VelocityChange);
-                }
+                isGrounded = false;
             }
         }
         
@@ -193,12 +187,12 @@ namespace ASeKi.system
         #region 关于跳跃
 
         public bool  isJumping = false;
-        private float jumpCounter = 0.3f;
-        private float jumpHeight = 4f;
+        public float jumpCounter = 0.3f;
+        private float jumpCounterDefaut = 0.3f;
+        public float jumpHeight = 4f;
         private float airSpeed = 5f;
         private float airSmooth = 6f;                    // 空中平滑速率 * DetalTime
-        private bool jumpWithRigidbodyForce = false;     // 使用刚体速度来影响跳跃高度 开关
-        
+
         protected virtual void ControlJump()
         {
             if (!isJumping) return;
@@ -206,10 +200,9 @@ namespace ASeKi.system
             jumpCounter -= Time.deltaTime;
             if (jumpCounter <= 0)
             {
-                jumpCounter = 0;
+                jumpCounter = 0.3f;
                 isJumping = false;
             }
-            // TODO:是不是应该增加而不是修改 
             var vel = _rigidbody.velocity;
             vel.y = jumpHeight;
             _rigidbody.velocity = vel;
@@ -220,7 +213,7 @@ namespace ASeKi.system
             if (isGrounded && !isJumping) return;
             inputSmooth = Vector3.Lerp(inputSmooth, inputVector3Param, airSmooth * Time.deltaTime);
 
-            if (jumpWithRigidbodyForce && !isGrounded)
+            if (!isGrounded)
             {
                 _rigidbody.AddForce(Time.deltaTime * airSpeed * moveDirection, ForceMode.VelocityChange);
                 return;

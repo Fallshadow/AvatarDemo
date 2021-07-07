@@ -18,7 +18,7 @@ public class Entity : MonoBehaviour
     public GameDesignScriptable gameDesignSetting;
 #endif
 
-    private void Awake()
+    protected virtual void Awake()
     {
         inputSystem = GetComponentInChildren<InputSystem>();
         inputSystem.InitSystem();
@@ -50,6 +50,13 @@ public class Entity : MonoBehaviour
     {
         needJump = false;
         inputSystem.UpdateSystem();
+        
+
+        cameraSystem.SetParam(inputSystem.InputVector3Param);
+        cameraSystem.UpdateSystem();
+        animatorSystem.SetParam(new HumanAnimatorParametersStruct(isRun, physicsSystem.isGrounded, stopMove,
+            physicsSystem.GetGroundDistance(), cameraSystem.GetMoveDirection(), AttrValue.runSpeed, AttrValue.walkSpeed));
+        animatorSystem.UpdateSystem();
         if (inputSystem.IsJumping)
         {
             inputSystem.IsJumping = false;
@@ -58,36 +65,31 @@ public class Entity : MonoBehaviour
                 needJump = true;
             }
         }
-
-        cameraSystem.SetParam(inputSystem.InputVector3Param);
-        cameraSystem.UpdateSystem();
-        animatorSystem.SetParam(new HumanAnimatorParametersStruct(isRun, physicsSystem.isGrounded, stopMove,
-            physicsSystem.GetGroundDistance(), cameraSystem.GetMoveDirection(), AttrValue.runSpeed, AttrValue.walkSpeed));
-        animatorSystem.UpdateSystem();
     }
 
     private void FixedUpdate()
     {
         physicsSystem.SetParam(inputSystem.InputVector3Param, cameraSystem.GetMoveDirection(), AttrValue.groundLayer, needJump);
-        physicsSystem.UpdateSystem();
+        if (needJump)
+        {
+            JumpAnim();
+        }
+        physicsSystem.FixedUpdateSystem();
         CheckSlopeLimit();
         Rotation();
         Run(inputSystem.IsRunning);
         Move(cameraSystem.GetMoveDirection());
-//        if (!animatorSystem.GetRootMotionSwitch())
-//        {
-//            Move(cameraSystem.GetMoveDirection());
-//        }
 
     }
+    
+    public virtual void JumpAnim()
+    {
+        if (inputSystem.InputVector3Param.sqrMagnitude < 0.1f)
+            animatorSystem.animator.CrossFadeInFixedTime("Jump", 0.1f);
+        else
+            animatorSystem.animator.CrossFadeInFixedTime("JumpMove", .2f);
+    }
 
-//    public virtual void OnAnimatorMove()
-//    {
-//        if (animatorSystem.ControlAnimatorRootMotion(inputSystem.InputVector3Param))
-//        {
-//            Move(cameraSystem.GetMoveDirection());
-//        }
-//    }
 
     protected virtual void CheckGround()
     {
@@ -118,7 +120,7 @@ public class Entity : MonoBehaviour
             _direction.Normalize();
         }
 
-        Vector3 targetPosition = _rigidbodyPos + Time.deltaTime * (stopMove ? 0 : AttrValue.walkSpeed) * _direction;
+        Vector3 targetPosition = _rigidbodyPos + Time.deltaTime * (stopMove ? 0 : moveSpeed) * _direction;
         Vector3 targetVelocity = (targetPosition - transform.position) / Time.deltaTime;
 
         targetVelocity.y = _rigidbodyVel.y;
@@ -181,23 +183,9 @@ public class Entity : MonoBehaviour
 
         if (value && sprintConditions)
         {
-            if (inputSystem.InputVector3Param.sqrMagnitude > 0.1f)
-            {
-                if (physicsSystem.isGrounded)
-                {
-                    isRun = !isRun;
-                }
-                else if (!isRun)
-                {
-                    isRun = true;
-                }
-            }
-            else if (isRun)
-            {
-                isRun = false;
-            }
+            isRun = true;
         }
-        else if (isRun)
+        else
         {
             isRun = false;
         }

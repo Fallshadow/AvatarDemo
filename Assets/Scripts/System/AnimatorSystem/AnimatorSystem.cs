@@ -5,13 +5,13 @@ namespace ASeKi.system
     [RequireComponent(typeof(Animator))]
     public class AnimatorSystem : MonoBehaviour, ISystem
     {
-        protected Animator animator;
+        public Animator animator;
         public bool UseRootMotion = false;        // 是否使用RootMotion
 
         public virtual void InitSystem()
         {
             animator = GetComponent<Animator>();
-            animator.updateMode = AnimatorUpdateMode.AnimatePhysics;
+            animator.updateMode = AnimatorUpdateMode.Normal;
         }
 
         public virtual void UpdateSystem()
@@ -23,9 +23,7 @@ namespace ASeKi.system
         {
             
         }
-        
 
-        
         public bool ControlAnimatorRootMotion(Vector3 moveInput)
         {
             if (!enabled)

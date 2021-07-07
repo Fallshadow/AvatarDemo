@@ -15,6 +15,14 @@ namespace ASeKi.fsm
         DEBUG_ENTRY,
         
     }
+    
+    public enum HumanEntityFsmState
+    {
+        Idle = 0,
+        Walk,
+        Run,
+        Jump,
+    }
 
     // 状态本身需要处理逻辑的几个过程：
     // 进入、退出、同步
