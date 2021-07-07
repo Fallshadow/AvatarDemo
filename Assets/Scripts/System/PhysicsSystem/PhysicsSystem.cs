@@ -261,6 +261,10 @@ namespace ASeKi.system
             _rigidbody.velocity = veloctiy;
         }
 
+        public virtual float GetGroundDistance()
+        {
+            return groundDistance;
+        }
         #endregion
     }
 }

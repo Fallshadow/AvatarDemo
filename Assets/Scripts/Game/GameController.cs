@@ -13,7 +13,7 @@ namespace ASeKi.game
             SetManagersActive(false);
             yield return new WaitForEndOfFrame();   // TODO:这里应该读取本地表格数据
             initState();
-            m_fsm.SwitchToState((int)GameFsmState.DEBUG_ENTRY);
+            m_fsm.SwitchToState((int)GameFsmState.ENTRY);
             SetManagersActive(true);
         }
 

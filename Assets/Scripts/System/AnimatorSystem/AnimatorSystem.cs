@@ -5,26 +5,21 @@ namespace ASeKi.system
     [RequireComponent(typeof(Animator))]
     public class AnimatorSystem : MonoBehaviour, ISystem
     {
-        private Animator animator;
-        private bool useRootMotion = false;        // 是否使用RootMotion
+        protected Animator animator;
+        public bool UseRootMotion = false;        // 是否使用RootMotion
 
-        public void InitSystem()
+        public virtual void InitSystem()
         {
             animator = GetComponent<Animator>();
             animator.updateMode = AnimatorUpdateMode.AnimatePhysics;
         }
-        
-        public void SetParam()
+
+        public virtual void UpdateSystem()
         {
             
         }
 
-        public void UpdateSystem()
-        {
-            
-        }
-
-        public void FixedUpdateSystem()
+        public virtual void FixedUpdateSystem()
         {
             
         }
@@ -38,7 +33,7 @@ namespace ASeKi.system
                 return false;
             }
 
-            if (useRootMotion)
+            if (UseRootMotion)
             {
                 if (moveInput == Vector3.zero)
                 {
@@ -48,7 +43,7 @@ namespace ASeKi.system
                 }
             }
             
-            return useRootMotion;
+            return UseRootMotion;
         }
         
 
@@ -58,7 +53,7 @@ namespace ASeKi.system
         // 获取RootMotion开关
         public virtual bool GetRootMotionSwitch()
         {
-            return useRootMotion;
+            return UseRootMotion;
         }
 
         public virtual Vector3 GetAnimationPos()

@@ -9,6 +9,7 @@ namespace ASeKi.fsm
         public override void Enter()
         {
             resetManagers();
+            m_fsm.SwitchToState((int)GameFsmState.RESET);
         }
 
         private void resetManagers()

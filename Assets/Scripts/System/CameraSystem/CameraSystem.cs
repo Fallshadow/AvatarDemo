@@ -51,6 +51,7 @@ namespace ASeKi.system
             {
                 moveDirection = new Vector3(inputVector3Param.x, 0, inputVector3Param.z);
             }
+            Debug.Log($"[CameraSystem] 移动方向{moveDirection}");
         }
 
         #region 外界接口

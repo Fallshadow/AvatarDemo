@@ -6,12 +6,11 @@ using UnityEngine;
 public class Entity : MonoBehaviour
 {
     public AttrBase AttrValue;
-    
-    [Header("System")]
-    [SerializeField] private AnimatorSystem  animatorSystem;
-    [SerializeField] private PhysicsSystem   physicsSystem;
-    [SerializeField] private InputSystem     inputSystem;
-    [SerializeField] private CameraSystem    cameraSystem;
+
+    [Header("System")] [SerializeField] private HumanAnimatorSystem animatorSystem;
+    [SerializeField] private PhysicsSystem physicsSystem;
+    [SerializeField] private InputSystem inputSystem;
+    [SerializeField] private CameraSystem cameraSystem;
 
     [Header("Data")]
 #if UNITY_EDITOR
@@ -20,10 +19,14 @@ public class Entity : MonoBehaviour
 
     private void Awake()
     {
-        inputSystem    = GetComponentInChildren<InputSystem>();
-        physicsSystem  = GetComponentInChildren<PhysicsSystem>();
-        animatorSystem = GetComponentInChildren<AnimatorSystem>();
-        cameraSystem   = GetComponentInChildren<CameraSystem>();
+        inputSystem = GetComponentInChildren<InputSystem>();
+        inputSystem.InitSystem();
+        physicsSystem = GetComponentInChildren<PhysicsSystem>();
+        physicsSystem.InitSystem();
+        animatorSystem = GetComponentInChildren<HumanAnimatorSystem>();
+        animatorSystem.InitSystem();
+        cameraSystem = GetComponentInChildren<CameraSystem>();
+        cameraSystem.InitSystem();
         initData();
     }
 
@@ -40,7 +43,6 @@ public class Entity : MonoBehaviour
 
     private void OnEnable()
     {
-        
     }
 
     private void Update()
@@ -55,22 +57,28 @@ public class Entity : MonoBehaviour
                 needJump = true;
             }
         }
+
         cameraSystem.SetParam(inputSystem.InputVector3Param);
         cameraSystem.UpdateSystem();
+        animatorSystem.SetParam(new HumanAnimatorParametersStruct(isRun, physicsSystem.isGrounded, stopMove,
+            physicsSystem.GetGroundDistance(), cameraSystem.GetMoveDirection(), AttrValue.runSpeed, AttrValue.walkSpeed));
+        animatorSystem.UpdateSystem();
     }
 
     private void FixedUpdate()
     {
-        physicsSystem.SetParam(inputSystem.InputVector3Param, cameraSystem.GetMoveDirection(),AttrValue.groundLayer, needJump);
+        physicsSystem.SetParam(inputSystem.InputVector3Param, cameraSystem.GetMoveDirection(), AttrValue.groundLayer, needJump);
         physicsSystem.UpdateSystem();
-        
+
+        Rotation();
         Run(inputSystem.IsRunning);
         if (!animatorSystem.GetRootMotionSwitch())
         {
             Move(cameraSystem.GetMoveDirection());
         }
+
     }
-    
+
     public virtual void OnAnimatorMove()
     {
         if (animatorSystem.ControlAnimatorRootMotion(inputSystem.InputVector3Param))
@@ -81,13 +89,12 @@ public class Entity : MonoBehaviour
 
     protected virtual void CheckGround()
     {
-        
     }
 
     #region 移动行为
 
+    private float moveSpeed; // 专们供给Move移动的暂存缓冲值
 
-    private float moveSpeed;                 // 专们供给Move移动的暂存缓冲值
     // 移动功能----普通版
     // 使用到的系统的信息：  RootMotion开关  物理系统的刚体  输入量
     // 启动信息： 方向
@@ -100,11 +107,11 @@ public class Entity : MonoBehaviour
         Vector3 inputVector3 = inputSystem.GetInputVector3();
         bool animatorSwitch = animatorSystem.GetRootMotionSwitch();
         moveSpeed = Mathf.Lerp(moveSpeed, isRun ? AttrValue.runSpeed : AttrValue.walkSpeed, AttrValue.moveSmoth * Time.deltaTime);
-        
+
         _direction.y = 0;
         _direction.x = Mathf.Clamp(_direction.x, -1f, 1f);
         _direction.z = Mathf.Clamp(_direction.z, -1f, 1f);
-        
+
         // 格式化方向向量
         if (_direction.magnitude > 1f)
         {
@@ -115,15 +122,16 @@ public class Entity : MonoBehaviour
         Vector3 targetVelocity = (targetPosition - transform.position) / Time.deltaTime;
 
         targetVelocity.y = _rigidbodyVel.y;
+        Debug.Log($"[Entity] 刚体速度{targetVelocity}");
         physicsSystem.SetRigidbodyVelocity(targetVelocity);
     }
 
     #endregion
-    
+
     #region 斜坡大于一定角度停止移动行为
-    
+
     bool stopMove = false;
-    
+
     // 斜坡策略----普通版
     // 使用到的系统的信息：  移动方向  物理系统的胶囊体高度、半径  输入量
     // 启动信息： 方向
@@ -133,7 +141,7 @@ public class Entity : MonoBehaviour
         Vector3 inputVector3 = inputSystem.GetInputVector3();
         Vector3 moveDirection = cameraSystem.GetMoveDirection();
         CapsuleCollider _capsuleCollider = physicsSystem.GetCapsuleCollider();
-        
+
         // 视为没有输入
         if (inputVector3.sqrMagnitude < 0.1) return;
 
@@ -158,6 +166,7 @@ public class Entity : MonoBehaviour
                 }
             }
         }
+
         stopMove = false;
     }
 
@@ -165,7 +174,8 @@ public class Entity : MonoBehaviour
 
     #region 跑步行为
 
-    private bool isRun;    // 标志是否在冲刺
+    private bool isRun; // 标志是否在冲刺
+
     public virtual void Run(bool value)
     {
         var sprintConditions = inputSystem.InputVector3Param.sqrMagnitude > 0.1f && physicsSystem.isGrounded;
@@ -197,7 +207,9 @@ public class Entity : MonoBehaviour
     #endregion
 
     #region 跳跃行为
+
     bool needJump = false;
+
     protected virtual bool JumpConditions()
     {
         return physicsSystem.isGrounded && physicsSystem.GroundAngle() < AttrValue.slopeLimit && !physicsSystem.isJumping && !stopMove;
@@ -210,7 +222,7 @@ public class Entity : MonoBehaviour
     private bool lockRotation = false;
     private Vector3 rotateSmooth;
     public bool jumpAndRotate = true;
-    
+
     public virtual void Rotation()
     {
         if (lockRotation) return;
@@ -237,5 +249,4 @@ public class Entity : MonoBehaviour
     }
 
     #endregion
-    
 }
