@@ -7,7 +7,8 @@ public class Entity : MonoBehaviour
 {
     public AttrBase AttrValue;
 
-    [Header("System")] [SerializeField] private HumanAnimatorSystem animatorSystem;
+    [Header("System")] 
+    [SerializeField] private HumanAnimatorSystem animatorSystem;
     [SerializeField] private PhysicsSystem physicsSystem;
     [SerializeField] private InputSystem inputSystem;
     [SerializeField] private CameraSystem cameraSystem;
@@ -69,23 +70,24 @@ public class Entity : MonoBehaviour
     {
         physicsSystem.SetParam(inputSystem.InputVector3Param, cameraSystem.GetMoveDirection(), AttrValue.groundLayer, needJump);
         physicsSystem.UpdateSystem();
-
+        CheckSlopeLimit();
         Rotation();
         Run(inputSystem.IsRunning);
-        if (!animatorSystem.GetRootMotionSwitch())
-        {
-            Move(cameraSystem.GetMoveDirection());
-        }
+        Move(cameraSystem.GetMoveDirection());
+//        if (!animatorSystem.GetRootMotionSwitch())
+//        {
+//            Move(cameraSystem.GetMoveDirection());
+//        }
 
     }
 
-    public virtual void OnAnimatorMove()
-    {
-        if (animatorSystem.ControlAnimatorRootMotion(inputSystem.InputVector3Param))
-        {
-            Move(cameraSystem.GetMoveDirection());
-        }
-    }
+//    public virtual void OnAnimatorMove()
+//    {
+//        if (animatorSystem.ControlAnimatorRootMotion(inputSystem.InputVector3Param))
+//        {
+//            Move(cameraSystem.GetMoveDirection());
+//        }
+//    }
 
     protected virtual void CheckGround()
     {
@@ -104,8 +106,6 @@ public class Entity : MonoBehaviour
         if (!physicsSystem.isGrounded || physicsSystem.isJumping) return;
         Vector3 _rigidbodyPos = physicsSystem.GetRigidbodyPosition();
         Vector3 _rigidbodyVel = physicsSystem.GetRigidbodyVelocity();
-        Vector3 inputVector3 = inputSystem.GetInputVector3();
-        bool animatorSwitch = animatorSystem.GetRootMotionSwitch();
         moveSpeed = Mathf.Lerp(moveSpeed, isRun ? AttrValue.runSpeed : AttrValue.walkSpeed, AttrValue.moveSmoth * Time.deltaTime);
 
         _direction.y = 0;
@@ -118,11 +118,10 @@ public class Entity : MonoBehaviour
             _direction.Normalize();
         }
 
-        Vector3 targetPosition = (animatorSwitch ? animatorSystem.GetAnimationPos() : _rigidbodyPos) + Time.deltaTime * (stopMove ? 0 : AttrValue.walkSpeed) * _direction;
+        Vector3 targetPosition = _rigidbodyPos + Time.deltaTime * (stopMove ? 0 : AttrValue.walkSpeed) * _direction;
         Vector3 targetVelocity = (targetPosition - transform.position) / Time.deltaTime;
 
         targetVelocity.y = _rigidbodyVel.y;
-        Debug.Log($"[Entity] 刚体速度{targetVelocity}");
         physicsSystem.SetRigidbodyVelocity(targetVelocity);
     }
 
@@ -218,34 +217,16 @@ public class Entity : MonoBehaviour
     #endregion
 
     #region 旋转行为
-
-    private bool lockRotation = false;
-    private Vector3 rotateSmooth;
-    public bool jumpAndRotate = true;
-
+    
     public virtual void Rotation()
     {
-        if (lockRotation) return;
-
-        bool validInput = inputSystem.InputVector3Param != Vector3.zero;
-
-        if (validInput)
-        {
-            // calculate input smooth
-            rotateSmooth = Vector3.Lerp(rotateSmooth, inputSystem.InputVector3Param, AttrValue.rotateSmooth * Time.deltaTime);
-
-            Vector3 dir = cameraSystem.GetMoveDirection();
-            RotateToDirection(dir, AttrValue.rotateSpeed);
-        }
-    }
-
-    public virtual void RotateToDirection(Vector3 direction, float rotationSpeed)
-    {
-        if (!jumpAndRotate && !physicsSystem.isGrounded) return;
-        direction.y = 0f;
-        Vector3 desiredForward = Vector3.RotateTowards(transform.forward, direction.normalized, rotationSpeed * Time.deltaTime, .1f);
+        if (!physicsSystem.isGrounded) return;
+        if (inputSystem.InputVector3Param == Vector3.zero) return;
+        Vector3 dir = cameraSystem.GetMoveDirection();
+        dir.y = 0f;
+        Vector3 desiredForward = Vector3.RotateTowards(animatorSystem.transform.forward, dir.normalized, AttrValue.rotateSpeed * Time.deltaTime, .1f);
         Quaternion _newRotation = Quaternion.LookRotation(desiredForward);
-        transform.rotation = _newRotation;
+        animatorSystem.transform.rotation = _newRotation;
     }
 
     #endregion

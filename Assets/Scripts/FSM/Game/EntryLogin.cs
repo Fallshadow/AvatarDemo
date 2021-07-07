@@ -1,16 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using ASeKi.ui;
 using UnityEngine;
 
 namespace ASeKi.fsm
 {
-    public class Entry : State<game.GameController>
+    public class EntryLogin : State<game.GameController>
     {
         public override void Enter()
         {
-            debug.PrintSystem.Log($"[Game][FSM][Entry] 进入entry状态");
-            initManagers();
-            m_fsm.SwitchToState((int)GameFsmState.RESET);
+            debug.PrintSystem.Log($"[Game][FSM][EntryLogin] 进入EntryLogin状态");
+            ui.UiManager.instance.OpenUi<EntryCanvas>();
         }
 
         private void initManagers()

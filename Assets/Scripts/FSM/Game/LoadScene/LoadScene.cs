@@ -7,10 +7,10 @@ namespace ASeKi.fsm
     public abstract class LoadScene : State<game.GameController>
     {
         private const string EMPTY_SCENE_NAME = "Empty";
-        
+        protected string scene_Name = "Empty";
         private IEnumerator loading;
 
-        protected LoadScene(constants.StageType st)
+        protected LoadScene()
         {
             
         }
@@ -82,7 +82,7 @@ namespace ASeKi.fsm
 
             onLoading();
 
-            SceneManager.LoadSceneAsync("21.ModelViewerTool", LoadSceneMode.Single);
+            SceneManager.LoadSceneAsync(scene_Name, LoadSceneMode.Single);
             yield return null;
 
             onLoadingEnd();

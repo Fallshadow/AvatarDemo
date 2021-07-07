@@ -4,5 +4,6 @@ namespace act.UIRes
     {
         NONE = -1,
         DebugMainCanvas,
+        EntryCanvas,
     }
 }

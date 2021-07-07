@@ -6,24 +6,27 @@ namespace ASeKi.game
 {
     public class GameController : SingletonMonoBehaviorNoDestroy<GameController>
     {
-        private Fsm<GameController> m_fsm = new Fsm<GameController>();
+        public readonly Fsm<GameController> FSM = new Fsm<GameController>();
         
         private IEnumerator Start()
         {
             SetManagersActive(false);
             yield return new WaitForEndOfFrame();   // TODO:这里应该读取本地表格数据
             initState();
-            m_fsm.SwitchToState((int)GameFsmState.ENTRY);
+            FSM.SwitchToState((int)GameFsmState.ENTRY);
             SetManagersActive(true);
         }
 
         private void initState()
         {
-            m_fsm.Initialize(this);
-            m_fsm.AddState((int)GameFsmState.ENTRY, new Entry());
-            m_fsm.AddState((int)GameFsmState.RESET, new Reset());
+            FSM.Initialize(this);
+            FSM.AddState((int)GameFsmState.ENTRY, new Entry());
+            FSM.AddState((int)GameFsmState.RESET, new Reset());
+            FSM.AddState((int)GameFsmState.ENTRY_LOGIN, new EntryLogin());
+            FSM.AddState((int)GameFsmState.MAIN_TOWN, new LoadMainTown());
+            FSM.AddState((int)GameFsmState.LOAD_SCENE, new LoadCurLevelScene());
 #if UNITY_EDITOR
-            m_fsm.AddState((int)GameFsmState.DEBUG_ENTRY, new DebugEntry());
+            FSM.AddState((int)GameFsmState.DEBUG_ENTRY, new DebugEntry());
 #endif
             
         }
@@ -41,22 +44,22 @@ namespace ASeKi.game
         
         private void FixedUpdate()
         {
-            m_fsm.FixedUpdate();
+            FSM.FixedUpdate();
         }
 
         private void Update()
         {
-            m_fsm.Update();
+            FSM.Update();
         }
         
         private void LateUpdate()
         {
-            m_fsm.LateUpdate();
+            FSM.LateUpdate();
         }
 
         private void OnDestroy()
         {
-            m_fsm.Finalize();
+            FSM.Finalize();
         }
     }
 }

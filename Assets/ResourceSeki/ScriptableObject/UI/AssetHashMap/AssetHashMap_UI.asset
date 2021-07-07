@@ -17,3 +17,7 @@ MonoBehaviour:
     AssetName: DebugMainCanvas
     HashCode: 898431425
     Index: 0
+  - AssetType: 0
+    AssetName: EntryCanvas
+    HashCode: -1350337668
+    Index: 1

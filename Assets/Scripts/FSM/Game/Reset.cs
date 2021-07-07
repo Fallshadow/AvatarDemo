@@ -8,8 +8,9 @@ namespace ASeKi.fsm
     {
         public override void Enter()
         {
+            debug.PrintSystem.Log($"[Game][FSM][Reset] 进入reset状态");
             resetManagers();
-            m_fsm.SwitchToState((int)GameFsmState.RESET);
+            m_fsm.SwitchToState((int)GameFsmState.ENTRY_LOGIN);
         }
 
         private void resetManagers()

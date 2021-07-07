@@ -6,7 +6,7 @@ namespace ASeKi.system
     {
         private Vector3 moveDirection;                     // 角色移动方向
         private Vector3 inputVector3Param;                 // 外界输入参数
-        private float directionSmooth;                     // 方向缓动数值
+        private float directionSmooth = 6f;                     // 方向缓动数值
         public bool rotateByWorld = false;                 // 绕着世界坐标旋转/在相机空间旋转
         
         public void SetParam(Vector3 inputVector3ParamP)

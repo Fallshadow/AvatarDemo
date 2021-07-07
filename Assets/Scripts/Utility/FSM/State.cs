@@ -9,9 +9,11 @@ namespace ASeKi.fsm
     {
         ENTRY = 0,
         RESET,
+        ENTRY_LOGIN,
         LOAD_SCENE,
         MAIN_TOWN,
-        DEBUG_ENTRY
+        DEBUG_ENTRY,
+        
     }
 
     // 状态本身需要处理逻辑的几个过程：
