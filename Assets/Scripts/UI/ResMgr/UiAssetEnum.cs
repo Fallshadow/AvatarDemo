@@ -3,7 +3,7 @@ namespace act.UIRes
     public enum UiAssetIndex
     {
         NONE = -1,
-        DebugMainCanvas,
+        DebugMainCanvas = 0,
         EntryCanvas,
     }
 }

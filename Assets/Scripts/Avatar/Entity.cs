@@ -13,8 +13,9 @@ public class Entity : MonoBehaviour
     [SerializeField] private InputSystem inputSystem;
     [SerializeField] private CameraSystem cameraSystem;
 
-    [Header("Data")]
+
 #if UNITY_EDITOR
+    [Header("Data")]
     public GameDesignScriptable gameDesignSetting;
 #endif
 

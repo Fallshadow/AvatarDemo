@@ -44,7 +44,7 @@ namespace ASeKi.ui
         protected Action<UiBase> onCloseCompleteHandler = null;                 // 结束展示时的调用，如果UI创建出来了那一定是有的，UImanager会赋值
         protected Action onAnimationCompleteCallback = null;                    // 用于各种动画的回调函数
         protected IUiAnimation[] uiAnimations = null;                           // 动画列表
-        protected HashSet<IUiAnimation> playingAnimations = null;               // 动画列表（HashSet无序不重复）
+        protected HashSet<IUiAnimation> playingAnimations = new HashSet<IUiAnimation>();               // 动画列表（HashSet无序不重复）
 
         public virtual void OnCreate()
         {
@@ -166,7 +166,6 @@ namespace ASeKi.ui
         protected void setAnimations()
         {
             uiAnimations = GetComponentsInChildren<IUiAnimation>();
-            playingAnimations = new HashSet<IUiAnimation>();
             for(int i = 0; i < uiAnimations.Length; ++i)
             {
                 uiAnimations[i].Initialize(onAnimationComplete);
@@ -203,6 +202,10 @@ namespace ASeKi.ui
                     }
             }
 
+            if (uiAnimations == null)
+            {
+                uiAnimations = GetComponentsInChildren<IUiAnimation>();
+            }
             for(int i = 0; i < uiAnimations.Length; ++i)
             {
                 if(uiAnimations[i].HasClip(animationClip))

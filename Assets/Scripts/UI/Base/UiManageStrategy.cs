@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace ASeKi.ui
 {
@@ -272,6 +273,7 @@ namespace ASeKi.ui
         #endregion
 
         #region FullScreen
+        public Dictionary<UiBase, GameObject> dictUiBaseGO = new Dictionary<UiBase, GameObject>();
         private void openFullScreenCanvas(UiBase ui, Action completeCb)
         {
             if(fullScreenCavases.Contains(ui))
@@ -285,8 +287,11 @@ namespace ASeKi.ui
             if(lastNode == null || lastNode.Value.State != UiState.Show && lastNode.Value.State != UiState.ShowingAnim)
             {
                 fullScreenCavases.AddLast(ui);
-                ui.transform.SetParent(fullScreenRoot);
-                ui.transform.SetAsFirstSibling();
+                GameObject gos = GameObject.Instantiate(ui, fullScreenRoot).gameObject;
+                gos.transform.SetAsFirstSibling();
+                dictUiBaseGO.Add(ui, gos);
+                // ui.transform.SetParent(fullScreenRoot);
+                // ui.transform.SetAsFirstSibling();
                 // UiManager.instance.SetEdgeMask();
                 ui.Open(onFullScreenCanvasClose, completeCb);
                 return;

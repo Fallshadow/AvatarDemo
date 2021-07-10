@@ -11,6 +11,7 @@ namespace ASeKi.fsm
         {
             debug.PrintSystem.Log($"[Game][FSM][EntryLogin] 进入EntryLogin状态");
             ui.UiManager.instance.OpenUi<EntryCanvas>();
+            debug.PrintSystem.Log($"[Game][FSM][EntryLogin] 打开UI EntryCanvas");
         }
 
         private void initManagers()

@@ -9,7 +9,7 @@ namespace ASeKi.AssetBundleCore
     public class ResourceLoaderProxy : Singleton<ResourceLoaderProxy>
     {
         ResourceLoaderManager manager;
-#if DEBUG_RESOURCE
+#if UNITY_EDITOR && DEBUG_RESOURCE
         FastModeLoaderManager fastModeManager;
 #endif
        

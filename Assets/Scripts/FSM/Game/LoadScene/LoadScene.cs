@@ -43,6 +43,7 @@ namespace ASeKi.fsm
 
         public override void Enter()
         {
+            debug.PrintSystem.Log($"[Game][FSM][LoadScene] 切换场景 删除UI");
             ui.UiManager.instance.DestroyAllUi();//一定放在onenter前面
             onEnter();
             

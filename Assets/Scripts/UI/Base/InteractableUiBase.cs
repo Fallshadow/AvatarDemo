@@ -22,6 +22,10 @@ namespace ASeKi.ui
         }
         public void SetInteractable(bool isInteractable)
         {
+            if (graphicRaycaster == null)
+            {
+                graphicRaycaster = GetComponent<GraphicRaycaster>();
+            }
             graphicRaycaster.enabled = isInteractable;
         }
         protected override void onShowComplete()

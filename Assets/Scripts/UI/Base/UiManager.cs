@@ -3,6 +3,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using act.UIRes;
+using Object = UnityEngine.Object;
 
 namespace ASeKi.ui
 {
@@ -53,16 +54,20 @@ namespace ASeKi.ui
             {
                 return ui;
             }
-
-            getUiViaType<UiBase>(uiType, out ui);
-            if(ui == null)
-            {
-                debug.PrintSystem.Log($"[UI Open]没有得到UI资源{uiType}");
-                return null;
-            }
-
-            ui = manageStrategy.CreateUi(ui);
-            ui.OnCreate();
+            //
+            // getUiViaType<UiBase>(uiType, out ui);
+            // if(ui == null)
+            // {
+            //     debug.PrintSystem.Log($"[UI Open]没有得到UI资源{uiType}");
+            //     return null;
+            // }
+            //
+            // ui = manageStrategy.CreateUi(ui);
+            // ui.OnCreate();
+            
+            
+            string resourceName = GetUiAssetName(uiType);
+            ui = Resources.Load<UiBase>(resourceName);
             loadedUiDict[uiAssetIndex] = ui;
             return ui;
         }
@@ -127,8 +132,10 @@ namespace ASeKi.ui
 
                 destroyUis.Add(kvPair.Key);
                 kvPair.Value.OnRuin();
-                Destroy(kvPair.Value.gameObject);
-                unloadAsset(kvPair.Key);
+                //DestroyImmediate(kvPair.Value,true);
+                Destroy(manageStrategy.dictUiBaseGO[kvPair.Value]);
+                // Destroy(kvPair.Value.gameObject);
+                // unloadAsset(kvPair.Key);
             }
             
             for (int i = 0, count = destroyUis.Count; i < count; ++i)
@@ -156,6 +163,13 @@ namespace ASeKi.ui
             Type attrType = typeof(BindingResourceAttribute);
             BindingResourceAttribute attr = Attribute.GetCustomAttribute(type, attrType) as BindingResourceAttribute;
             return attr.AssetId;
+        }
+        
+        public static string GetUiAssetName(Type type)
+        {
+            Type attrType = typeof(BindingResourceAttribute);
+            BindingResourceAttribute attr = Attribute.GetCustomAttribute(type, attrType) as BindingResourceAttribute;
+            return attr?.resourceName;
         }
 
         #endregion
